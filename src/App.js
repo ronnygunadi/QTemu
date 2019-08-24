@@ -2,6 +2,11 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import { Button, Input } from "antd";
+import AnotherComponent from './AnotherComponent';
+import { thisTypeAnnotation } from '@babel/types';
+import Axios from 'axios';
+import HOCFetchData from './HOCFetchData'; 
+import {withRouter} from 'react-router-dom';
 
 class App extends React.Component {
 
@@ -10,9 +15,15 @@ class App extends React.Component {
     this.state = {
       number: 0,
       numberMultiply: 0,
+      dataUser: [],
+      dataPosts: []
     }
     //this.handleDecrementNumber = this.handleDecrementNumber.bind(this);
   }
+
+  // componentDidMount() {
+  //   this.handleFetchUsers();
+  // }
 
   handleDecrementNumber = () => {
     this.setState({
@@ -28,7 +39,7 @@ class App extends React.Component {
 
   handleChange = (e) => {
     var regExp = new RegExp("^\\d+$");
-    if(regExp.test(e.target.value) || e.target.value == ""){
+    if (regExp.test(e.target.value) || e.target.value == "") {
       console.log(e.target.value)
       this.setState({ numberMultiply: e.target.value })
     }
@@ -42,18 +53,37 @@ class App extends React.Component {
     )
   }
 
+  handleFetchUsers = (url) => {
+    Axios.get(`https://5d60ae27c2ca490014b27096.mockapi.io/api/v1/${url}`).then(
+      ({ data }) => {
+        this.setState({ dataUser: data })
+        console.log("this.data", this.state.dataUser);
+      })
+  }
+
+  handleFetchPosts = (url) =>{
+    Axios.get(`https://5d60ae27c2ca490014b27096.mockapi.io/api/v1/${url}`).then(
+      ({ data }) => {
+        this.setState({ dataPosts: data })
+        console.log("this.data", this.state.dataPosts);
+      })
+  }
+
   render() {
-    const { number, numberMultiply } = this.state;
+    console.log('App Props', this.props);
+    const { number, numberMultiply, dataUser, dataPosts} = this.state;
     return (
       <div className="App">
-        <Button onClick={this.handleDecrementNumber} className="coba" type="primary">
-          Tambah
-        </Button>
-
-        <Button onClick={this.handleIncrementNumber} className="coba" type="primary">
-          Kurang
-        </Button>
-        <br />
+        <AnotherComponent
+          handleDecrementNumber={this.handleDecrementNumber}
+          handleIncrementNumber={this.handleIncrementNumber}
+          handleFetchUsers={this.handleFetchUsers.bind(this)}
+          handleFetchPosts={this.handleFetchPosts.bind(this)}
+          number={number}
+          {...this.state}
+        ></AnotherComponent>
+        
+        {/* <br />
         <Input style={{ width: 100 }} value={numberMultiply} onChange={this.handleChange} >
 
         </Input>
@@ -63,10 +93,17 @@ class App extends React.Component {
           Kali 10
         </Button>
         <br />
-        {number}
+        <br />
+
+        <br /> */}
+        {/* {dataUser.map((v) => {
+          return (
+            <li>{v.name}</li>
+          )
+        })} */}
       </div>
     );
   }
 }
 
-export default App;
+export default withRouter(HOCFetchData(App));
